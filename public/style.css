@@ -92,14 +92,14 @@ h1, h2, h3, h4, h5, h6 {
     top: 0;
     left: 0;
     width: 100%;
-    height: 80px;
+    height: clamp(60px, 10vh, 80px);
     background: rgba(5, 5, 8, 0.75);
     backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--glass-border);
-    z-index: 5000; /* Increased significantly to stay above everything */
+    z-index: 5000;
     display: flex;
     align-items: center;
-    padding: 0 2rem;
+    padding: 0 clamp(1rem, 5vw, 2rem);
 }
 
 .nav-inner {
@@ -113,29 +113,30 @@ h1, h2, h3, h4, h5, h6 {
 
 .logo {
     font-family: var(--font-display);
-    font-size: 1.5rem;
+    font-size: clamp(0.9rem, 4vw, 1.5rem);
     font-weight: 800;
     letter-spacing: 0.1em;
     color: var(--text-primary);
     text-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+    white-space: nowrap;
 }
 
 .nav-right {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: clamp(0.5rem, 3vw, 1.5rem);
 }
 
 #user-name-display {
-    font-size: 0.875rem;
+    font-size: clamp(0.65rem, 2vw, 0.875rem);
     color: var(--text-secondary);
     font-weight: 600;
     letter-spacing: 0.05em;
 }
 
 .btn-nav {
-    padding: 0.5rem 1.5rem;
-    font-size: 0.875rem;
+    padding: clamp(0.4rem, 1.5vw, 0.5rem) clamp(0.8rem, 3vw, 1.5rem);
+    font-size: clamp(0.65rem, 2vw, 0.875rem);
 }
 
 /* Screen Management */
@@ -990,5 +991,294 @@ textarea {
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM
+   ========================================================================== */
+
+/* Medium Devices (Tablets, 1024px and down) */
+@media screen and (max-width: 1024px) {
+    .task-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .admin-container {
+        padding: 0 1rem;
+    }
+}
+
+/* Small Devices (Phones, 768px and down) */
+@media screen and (max-width: 768px) {
+    /* Layout & Spacing */
+    .screen {
+        padding: 90px 1rem 4rem;
+    }
+
+    .glass-card {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    /* Navbar Redesign */
+    #navbar {
+        height: clamp(56px, 8vh, 70px);
+        padding: 0 0.75rem;
+    }
+
+    .nav-inner {
+        gap: 0.5rem;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .logo {
+        font-size: clamp(0.75rem, 3.5vw, 1rem); /* Further reduced min size */
+        flex: 1; /* Allow logo area to grow/shrink */
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .nav-right {
+        gap: clamp(0.25rem, 1.5vw, 0.5rem);
+        flex: 0 0 auto; /* Don't let right side grow too much */
+        display: flex;
+        align-items: center;
+        min-width: 0;
+    }
+
+    #user-name-display {
+        display: block;
+        font-size: clamp(0.5rem, 2vw, 0.7rem);
+        max-width: clamp(60px, 20vw, 100px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: right;
+    }
+
+    .btn-nav {
+        padding: 0.25rem 0.5rem;
+        font-size: clamp(0.5rem, 2vw, 0.7rem);
+        height: auto;
+        min-height: 26px;
+        white-space: nowrap;
+    }
+
+    /* Hero Section */
+    .hero-title {
+        font-size: 3rem;
+    }
+
+    .subtitle {
+        font-size: 0.7rem;
+        letter-spacing: 0.2em;
+    }
+
+    /* Task Grid */
+    .task-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    /* Task View */
+    .task-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.25rem;
+    }
+
+    #task-view-title {
+        font-size: 1.5rem;
+    }
+
+    .task-header > div {
+        justify-content: space-between;
+    }
+
+    #header-timer {
+        justify-content: center;
+        width: 100%;
+    }
+
+    /* Question Items */
+    .question-item {
+        padding: 1.25rem;
+    }
+
+    .question-item > div:first-child {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+
+    .question-item .btn {
+        width: 100%;
+    }
+
+    .task-image {
+        width: calc(50% - 0.5rem);
+        height: 120px;
+    }
+
+    /* Admin Panel */
+    .admin-nav {
+        flex-direction: column;
+        position: static;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .admin-header div {
+        text-align: left !important;
+    }
+
+    /* Admin Panel Table Responsive Transform */
+    .mission-table thead {
+        display: none; /* Hide headers on mobile */
+    }
+
+    .mission-table, .mission-table tbody, .mission-table tr, .mission-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .mission-table tr {
+        margin-bottom: 1.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1rem;
+    }
+
+    .mission-table td {
+        border: none;
+        padding: 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+    }
+
+    .mission-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        margin-right: 1rem;
+        text-align: left;
+    }
+
+    .admin-actions-cell {
+        flex-direction: row;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        border-top: 1px solid var(--glass-border);
+        padding-top: 1rem;
+    }
+
+    /* Admin Editor */
+    #admin-mission-editor-view .admin-task-card > div:first-child {
+        grid-template-columns: 1fr !important;
+    }
+
+    .admin-page-content {
+        padding: 1rem !important;
+    }
+
+    /* Discovery Modal */
+    .modal-card[style*="max-width: 800px"] {
+        height: 95vh !important;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    /* Status Overlay (Timer) */
+    #status-overlay {
+        top: 70px;
+        right: 1rem;
+        left: 1rem;
+    }
+
+    #timer-box {
+        padding: 0.75rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #timer-clock {
+        font-size: 1.5rem;
+    }
+
+    .timer-label {
+        margin-bottom: 0;
+    }
+
+    /* Modals */
+    .modal-card {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    .modal-footer {
+        flex-direction: column-reverse;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+    }
+}
+
+/* Extra Small Devices (Tiny Phones, 480px and down) */
+@media screen and (max-width: 480px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.75rem;
+    }
+
+    .task-image {
+        width: 100%;
+        height: 180px;
+    }
+
+    .final-card h1 {
+        font-size: 1.8rem;
+    }
+
+    .final-icon {
+        font-size: 3.5rem;
+    }
+}
+
+/* Handle landscape mode on phones specifically if needed */
+@media screen and (max-height: 500px) and (max-width: 900px) {
+    .screen {
+        padding-top: 70px;
+    }
+    
+    #login-screen, #welcome-screen, #final-screen {
+        justify-content: flex-start;
+        padding-top: 80px;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
 }
 

@@ -118,6 +118,7 @@ function startWelcomeSequence() {
 
 async function showHome(forceHome = false) {
     stopTimer();
+    stopExtractionTimer();
     const res = await fetch('/api/tasks');
     allTasks = await res.json();
 
@@ -170,7 +171,8 @@ function openTask(index, forceOpen = false) {
     const isLocked = index > currentUser.completedTasks;
     const isCompleted = index < currentUser.completedTasks;
 
-    // Reset header timer visibility on opening
+    // Reset and stop any active extraction timers on opening a task
+    stopExtractionTimer();
     document.getElementById('header-timer').style.display = 'none';
     const headerSubmit = document.getElementById('header-complete-task-btn');
     const footerSubmit = document.getElementById('complete-task-btn');
@@ -379,27 +381,27 @@ function renderAdminStats() {
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td style="font-weight: 800; color: ${isDisqualified ? 'var(--neon-red)' : 'var(--accent-cyan)'};">${user.username.toUpperCase()}</td>
-            <td style="font-size: 0.75rem; color: var(--text-secondary);">BBS-${Math.random().toString(36).substr(2, 6).toUpperCase()}</td>
-            <td>
+            <td data-label="OPERATIVE" style="font-weight: 800; color: ${isDisqualified ? 'var(--neon-red)' : 'var(--accent-cyan)'};">${user.username.toUpperCase()}</td>
+            <td data-label="ID" style="font-size: 0.75rem; color: var(--text-secondary);">BBS-${Math.random().toString(36).substr(2, 6).toUpperCase()}</td>
+            <td data-label="STATUS">
                 <span style="background: ${isDisqualified ? 'rgba(255, 59, 105, 0.1)' : 'rgba(0, 217, 255, 0.1)'}; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; color: ${isDisqualified ? 'var(--neon-red)' : 'var(--accent-cyan)'}; border: 1px solid ${isDisqualified ? 'var(--neon-red)' : 'var(--accent-cyan)'};">
                     ${isDisqualified ? 'DISQUALIFIED' : 'ONLINE'}
                 </span>
             </td>
-            <td>
+            <td data-label="MISSIONS">
                 <div style="font-weight: 700;">${user.completedTasks} / ${adminTasks.length}</div>
             </td>
-            <td>
+            <td data-label="ITEMS FOUND">
                 <button class="btn btn-sm" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--accent-cyan);" 
                         onclick="showDiscoveryModal('${user.username}')">${totalItemsFound} ITEMS</button>
             </td>
-            <td>
+            <td data-label="SECURITY">
                 <button class="btn btn-sm ${isDisqualified ? 'btn-save' : 'btn-back'}" style="width: 110px;"
                         onclick="toggleDisqualification('${user.username}', ${!isDisqualified})">
                     ${isDisqualified ? 'REINSTATE' : 'DISQUALIFY'}
                 </button>
             </td>
-            <td style="display: flex; gap: 0.5rem;">
+            <td data-label="ACTIONS" class="admin-actions-cell">
                 <button class="btn btn-sm btn-back" onclick="resetUser('${user.username}')">RESET</button>
             </td>
         `;
@@ -498,17 +500,17 @@ function renderAdminTasks() {
         const isVisible = task.visible !== false;
 
         tr.innerHTML = `
-            <td>#0${tIdx + 1}</td>
-            <td style="font-weight: 700;">${task.title}</td>
-            <td>
+            <td data-label="ID">#0${tIdx + 1}</td>
+            <td data-label="TITLE" style="font-weight: 700;">${task.title}</td>
+            <td data-label="STATUS">
                 <span class="status-badge ${isVisible ? 'status-active' : 'status-hidden'}">
                     ${isVisible ? 'ACTIVE' : 'HIDDEN'}
                 </span>
             </td>
-            <td>${task.timerEnabled ? `${task.duration}s` : 'OFF'}</td>
-            <td class="admin-actions-cell">
-                <button class="btn btn-sm" style="background: rgba(255,255,255,0.05); border:1px solid var(--glass-border);" onclick="showMissionEditor(${tIdx})">EDIT MISSION</button>
-                <button class="btn btn-sm btn-back" onclick="deleteTask(${tIdx})">DELETE</button>
+            <td data-label="TIMER">${task.timerEnabled ? `${task.duration}s` : 'OFF'}</td>
+            <td data-label="ACTIONS" class="admin-actions-cell">
+                <button class="btn btn-sm" style="background: rgba(255,255,255,0.05); border:1px solid var(--glass-border);" onclick="showMissionEditor(${tIdx})">EDIT</button>
+                <button class="btn btn-sm btn-back" onclick="deleteTask(${tIdx})">DEL</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -755,7 +757,7 @@ async function submitTaskCompletion(taskId) {
 
 let extractionInterval = null;
 function startExtractionTimer(seconds) {
-    if (extractionInterval) clearInterval(extractionInterval);
+    stopExtractionTimer();
 
     let time = seconds;
     const timerBox = document.getElementById('header-timer');
@@ -785,6 +787,16 @@ function startExtractionTimer(seconds) {
         }
     }, 1000);
 }
+
+function stopExtractionTimer() {
+    if (extractionInterval) {
+        clearInterval(extractionInterval);
+        extractionInterval = null;
+    }
+    const timerBox = document.getElementById('header-timer');
+    if (timerBox) timerBox.style.display = 'none';
+}
+
 
 function showHomeManual() {
     showHome();
