@@ -236,6 +236,43 @@ textarea {
     resize: vertical;
 }
 
+/* Password Toggle Styling */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 3.5rem !important;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+    z-index: 10;
+    border-radius: 50%;
+}
+
+.toggle-password:hover {
+    color: var(--accent-cyan);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.toggle-password svg {
+    display: block;
+}
+
 /* Button System */
 .btn {
     padding: 1rem 2rem;

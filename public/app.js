@@ -168,6 +168,20 @@ function openTask(index, forceOpen = false) {
 
     // Allow opening if it's the current task, a completed task, or if user has the password
     const isLocked = index > currentUser.completedTasks;
+    const isCompleted = index < currentUser.completedTasks;
+
+    // Reset header timer visibility on opening
+    document.getElementById('header-timer').style.display = 'none';
+    const headerSubmit = document.getElementById('header-complete-task-btn');
+    const footerSubmit = document.getElementById('complete-task-btn');
+
+    if (isCompleted) {
+        headerSubmit.style.display = 'none';
+        footerSubmit.style.display = 'none';
+    } else {
+        headerSubmit.style.display = 'block';
+        footerSubmit.style.display = 'block';
+    }
 
     if (isLocked && task.password && !forceOpen) {
         const attempts = (currentUser.wrongAttempts && currentUser.wrongAttempts[index]) || 0;
@@ -199,7 +213,8 @@ function openTask(index, forceOpen = false) {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <div class="question-text">ITEM 0${i + 1}: ${q.text}</div>
                     <button class="btn btn-sm ${isSecured ? 'btn-save' : 'btn-add'}" 
-                            onclick="toggleItemStatus(${index}, ${i})">
+                            onclick="toggleItemStatus(${index}, ${i})"
+                            ${isCompleted ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
                         ${isSecured ? '✓ ITEM SECURED' : 'SECURE ITEM'}
                     </button>
                 </div>
@@ -218,7 +233,9 @@ function openTask(index, forceOpen = false) {
         stopTimer();
     }
 
-    document.getElementById('complete-task-btn').onclick = () => submitTaskCompletion(index + 1);
+    const submitFn = () => submitTaskCompletion(index + 1);
+    document.getElementById('complete-task-btn').onclick = submitFn;
+    document.getElementById('header-complete-task-btn').onclick = submitFn;
     showScreen('task-screen');
 }
 
@@ -541,8 +558,16 @@ function renderMissionEditor(tIdx) {
                 </div>
                 <div class="input-group" style="margin-bottom: 0;">
                     <label>ACCESS PASSWORD (OPTIONAL)</label>
-                    <input type="text" value="${task.password || ''}" placeholder="LEAVE BLANK FOR NO PASSWORD" 
-                           oninput="updateTaskField(${tIdx}, 'password', this.value)">
+                    <div class="password-wrapper">
+                        <input type="password" id="admin-pass-${tIdx}" value="${task.password || ''}" placeholder="LEAVE BLANK FOR NO PASSWORD" 
+                               oninput="updateTaskField(${tIdx}, 'password', this.value)">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('admin-pass-${tIdx}', this)" title="Toggle Password Visibility">
+                            <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -691,7 +716,20 @@ async function logout() {
 }
 
 async function submitTaskCompletion(taskId) {
+    const isAlreadyCompleted = (taskId - 1) < currentUser.completedTasks;
+    if (isAlreadyCompleted) return;
+
+    const confirmed = await showSystemModal("INITIALIZE UPLOAD", "Are you sure you want to finalize this mission's data? Current intel acquisition will be locked.", true, '📤');
+    if (!confirmed) return;
+
     stopTimer();
+
+    // Check if all items secured
+    const taskIndex = taskId - 1;
+    const task = allTasks[taskIndex];
+    const itemsFound = (currentUser.itemsFound && currentUser.itemsFound[taskIndex]) || [];
+    const allSecured = task.questions && itemsFound.length === task.questions.length;
+
     try {
         const res = await fetch('/api/complete-task', {
             method: 'POST',
@@ -702,11 +740,50 @@ async function submitTaskCompletion(taskId) {
         if (data.success) {
             currentUser.completedTasks = taskId;
             sessionStorage.setItem('bbs_user', JSON.stringify(currentUser));
-            showHome();
+
+            if (allSecured) {
+                startExtractionTimer(60);
+                openTask(taskIndex); // Re-render in read-only mode
+            } else {
+                showHome();
+            }
         }
     } catch (err) {
         showToast('ERROR SUBMITTING DATA', 'error');
     }
+}
+
+let extractionInterval = null;
+function startExtractionTimer(seconds) {
+    if (extractionInterval) clearInterval(extractionInterval);
+
+    let time = seconds;
+    const timerBox = document.getElementById('header-timer');
+    const clock = document.getElementById('header-timer-clock');
+    const headerSubmit = document.getElementById('header-complete-task-btn');
+
+    headerSubmit.style.display = 'none';
+    timerBox.style.display = 'flex';
+
+    const updateDisplay = () => {
+        const mins = Math.floor(time / 60);
+        const secs = time % 60;
+        clock.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    updateDisplay();
+
+    extractionInterval = setInterval(() => {
+        time--;
+        updateDisplay();
+
+        if (time <= 0) {
+            clearInterval(extractionInterval);
+            showSystemModal("TIME'S UP", "Extraction window closed. Returning to home roster.", false, '⌛').then(() => {
+                showHome();
+            });
+        }
+    }, 1000);
 }
 
 function showHomeManual() {
@@ -725,3 +802,27 @@ window.onload = () => {
         }
     }
 };
+
+// --- PASSWORD TOGGLE ---
+function togglePasswordVisibility(inputId, button) {
+    const input = document.getElementById(inputId);
+    const svg = button.querySelector('svg');
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        // Eye-off icon
+        svg.innerHTML = `
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+        `;
+        button.title = "Hide Password";
+    } else {
+        input.type = 'password';
+        // Eye icon
+        svg.innerHTML = `
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+        `;
+        button.title = "Show Password";
+    }
+}
