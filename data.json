@@ -2,7 +2,7 @@
   "users": [
     {
       "username": "yash",
-      "completedTasks": 4,
+      "completedTasks": 0,
       "performance": "Operative",
       "startTime": "2026-01-30T04:59:29.671Z",
       "itemsFound": {
@@ -19,6 +19,15 @@
       "completedTasks": 0,
       "performance": "Operative",
       "startTime": "2026-01-30T05:00:59.255Z"
+    },
+    {
+      "username": "manav",
+      "completedTasks": 0,
+      "itemsFound": {},
+      "disqualified": false,
+      "wrongAttempts": {},
+      "performance": "Operative",
+      "startTime": "2026-01-30T09:25:16.536Z"
     }
   ],
   "tasks": [
