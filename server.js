@@ -198,6 +198,15 @@ app.post('/api/update-attempts', (req, res) => {
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Fallback routes for logo and background images if they are in root
+app.get('/logo.jpg', (req, res) => {
+    res.sendFile(path.join(__dirname, 'technomatra logo.jpeg'));
+});
+
+app.get('/bg.jpg', (req, res) => {
+    res.sendFile(path.join(__dirname, 'technomatra logo.jpeg'));
+});
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
