@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beg Borrow Steal | Modern Gaming Arena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="bg-canvas"></div>
+    <div id="glow-overlay"></div>
+
+    <!-- Global Navigation -->
+    <nav id="navbar">
+        <div class="nav-inner">
+            <div class="logo">BEG BORROW STEAL</div>
+            <div class="nav-right" id="nav-user-info" style="display: none;">
+                <span id="user-name-display"></span>
+                <button onclick="logout()" class="btn btn-nav btn-sm">LOGOUT</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Timer Overlay -->
+    <div id="status-overlay">
+        <div id="timer-box" style="display: none;">
+            <div class="timer-label">TIME REMAINING</div>
+            <div id="timer-clock">00:00</div>
+        </div>
+    </div>
+
+    <!-- Screen: Login -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container glass-card">
+            <h1 class="hero-title"> BBS</h1>
+            <p class="subtitle">ENTER YOUR OPERATIVE CREDENTIALS</p>
+            <div class="input-group">
+                <input type="text" id="username" placeholder="OPERATIVE NAME" spellcheck="false">
+                <input type="password" id="password" placeholder="ACCESS CODE" spellcheck="false">
+            </div>
+            <button id="login-btn" class="btn btn-primary pulse">INITIALIZE LINK</button>
+            <p id="login-error" class="error-msg"></p>
+        </div>
+    </div>
+
+    <!-- Screen: Welcome -->
+    <div id="welcome-screen" class="screen">
+        <div class="welcome-box">
+            <div class="loading-ring"></div>
+            <h2 id="welcome-text" class="glitch-text" data-text="Welcome to our game – Beg Borrow Steal">Welcome to our game – Beg Borrow Steal</h2>
+        </div>
+    </div>
+
+    <!-- Screen: Home -->
+    <div id="home-screen" class="screen">
+        <div class="home-content">
+            <h2 class="section-title">MISSION ROSTER</h2>
+            <div class="task-grid" id="task-list">
+                <!-- Tasks will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: Task View -->
+    <div id="task-screen" class="screen">
+        <div class="task-container glass-card">
+            <div class="task-header">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="btn btn-back btn-sm" onclick="showHome()">← BACK</button>
+                    <h2 id="task-view-title" style="margin: 0;"></h2>
+                </div>
+            </div>
+            <div id="task-description" class="task-desc"></div>
+            <div id="task-questions" class="questions-list">
+                <!-- Questions injected here -->
+            </div>
+            <div class="task-footer">
+                <button id="complete-task-btn" class="btn btn-primary">SUBMIT DATA</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: Final Completion -->
+    <div id="final-screen" class="screen">
+        <div class="final-card glass-card">
+            <span class="final-icon">🏆</span>
+            <h1>MISSION ACCOMPLISHED</h1>
+            <p id="final-msg">🎉 Thank you for participating in Beg Borrow Steal! We hope you enjoyed the challenge.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn btn-back" onclick="showHome(true)">REVISIT MISSIONS</button>
+                <button class="btn btn-primary" onclick="logout()">TERMINATE SESSION</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: Disqualified -->
+    <div id="disqualified-screen" class="screen">
+        <div class="final-card glass-card" style="border-color: var(--neon-red);">
+            <span class="final-icon">🚫</span>
+            <h1 style="color: var(--neon-red);">CORE DISQUALIFICATION</h1>
+            <p>Your operative clearance has been revoked due to security protocol violations (Too many failed decrypt attempts).</p>
+            <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 2rem;">CONTACT COMMAND CENTER FOR REINSTATEMENT</p>
+            <button class="btn btn-back" onclick="logout()" style="margin-top: 2rem;">LOGOUT</button>
+        </div>
+    </div>
+
+    <!-- Screen: Mission Password -->
+    <div id="password-screen" class="screen">
+        <div class="login-container glass-card" style="max-width: 400px;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🔐</div>
+            <h2>MISSION DECRYPTOR</h2>
+            <p class="admin-subtitle">ENTER SECURITY KEY TO ACCESS INTEL</p>
+            <div class="input-group" style="margin-top: 2rem;">
+                <input type="password" id="mission-pass-input" placeholder="ENTER ACCESS CODE" style="text-align: center; letter-spacing: 0.5em;">
+            </div>
+            <div id="password-feedback" style="font-size: 0.7rem; color: var(--neon-red); margin-top: 10px; height: 15px;"></div>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-back" onclick="showHome(true)" style="flex: 1;">BACK</button>
+                <button class="btn btn-primary" onclick="verifyMissionPassword()" style="flex: 1;">DECRYPT</button>
+            </div>
+            <p id="retry-counter" style="font-size: 0.7rem; margin-top: 1rem; opacity: 0.5;"></p>
+        </div>
+    </div>
+
+    <!-- Screen: Admin Panel -->
+    <div id="admin-screen" class="screen">
+        <div class="admin-container">
+            <!-- Admin Navigation Tabs -->
+            <nav class="admin-nav glass-card">
+                <button class="admin-tab active" onclick="switchAdminTab('intel')" id="tab-intel">
+                    <span class="tab-icon">👥</span>
+                    OPERATIVE INTEL
+                </button>
+                <button class="admin-tab" onclick="switchAdminTab('missions')" id="tab-missions">
+                    <span class="tab-icon">🎯</span>
+                    MISSION CONTROL
+                </button>
+            </nav>
+
+            <!-- Operative Intel Page -->
+            <div id="admin-page-intel" class="admin-page active">
+                <div class="admin-page-content glass-card">
+                    <div class="admin-page-header">
+                        <h2>OPERATIVE INTELLIGENCE</h2>
+                        <p class="admin-subtitle">Monitor all active operatives and their mission progress</p>
+                    </div>
+                    <div class="mission-table-wrapper">
+                        <table class="mission-table">
+                            <thead>
+                                <tr>
+                                    <th>OPERATIVE</th>
+                                    <th>ID</th>
+                                    <th>STATUS</th>
+                                    <th>MISSIONS</th>
+                                    <th>ITEMS FOUND</th>
+                                    <th>SECURITY</th>
+                                    <th>ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-stats-list">
+                                <!-- Users injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mission Control Page -->
+            <div id="admin-page-missions" class="admin-page">
+                <div class="admin-page-content glass-card">
+                    <!-- Mission Listing View -->
+                    <div id="admin-missions-list-view">
+                        <div class="admin-header">
+                            <button class="btn btn-add btn-sm" onclick="showMissionEditor(null)">+ CREATE MISSION</button>
+                            <div style="text-align: right;">
+                                <h2>MISSION CONTROL CENTER</h2>
+                                <p class="admin-subtitle">Manage all operative tasks and parameters</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mission-table-wrapper">
+                            <table class="mission-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>TITLE</th>
+                                        <th>STATUS</th>
+                                        <th>TIMER</th>
+                                        <th>ACTIONS</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mission-table-body">
+                                    <!-- Missions injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Mission Editor View (Hidden by default) -->
+                    <div id="admin-mission-editor-view" style="display: none;">
+                        <div class="admin-header">
+                            <h2 id="editor-title">MISSION CONFIGURATION</h2>
+                            <button class="btn btn-back btn-sm" onclick="hideMissionEditor()">← BACK TO LIST</button>
+                        </div>
+                        <div id="active-mission-editor">
+                            <!-- Editor fields injected here -->
+                        </div>
+                        <div class="admin-footer" style="margin-top: 2rem; border-top: 1px solid var(--glass-border); padding-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                            <button class="btn btn-save" onclick="saveAdminData()">💾 SAVE ALL CHANGES</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Discovery Manager Modal (Admin Only) -->
+    <div id="admin-user-discovery-modal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 800px; height: 80vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h3 id="discovery-user-title">INTEL DISCOVERY CONTROL</h3>
+            </div>
+            <div class="modal-body" style="flex: 1; overflow-y: auto;">
+                <div id="discovery-missions-container">
+                    <!-- Missions and items injected here -->
+                </div>
+            </div>
+            <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--glass-border);">
+                <button class="btn btn-back btn-sm" onclick="closeDiscoveryModal()">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal System -->
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div id="modal-header" class="modal-header">
+                <span id="modal-icon">⚠️</span>
+                <h3 id="modal-title">SYSTEM ALERT</h3>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message"></p>
+            </div>
+            <div id="modal-footer" class="modal-footer">
+                <button id="modal-cancel-btn" class="btn btn-back btn-sm" style="display: none;">CANCEL</button>
+                <button id="modal-confirm-btn" class="btn btn-primary btn-sm">PROCEED</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+{
+  "users": [
+    {
+      "username": "yash",
+      "completedTasks": 4,
+      "performance": "Operative",
+      "startTime": "2026-01-30T04:59:29.671Z",
+      "itemsFound": {
+        "0": [],
+        "1": [
+          0
+        ]
+      },
+      "disqualified": false,
+      "wrongAttempts": {}
+    },
+    {
+      "username": "raxit",
+      "completedTasks": 0,
+      "performance": "Operative",
+      "startTime": "2026-01-30T05:00:59.255Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Operation: Digital Ghost",
+      "description": "The first phase of the infiltration. Locate the hidden encrypted keys within the designated sector. Stay low and avoid detection.",
+      "timerEnabled": true,
+      "duration": 60,
+      "visible": true,
+      "questions": [
+        {
+          "text": "Identify the primary server location from the provided schematic.",
+          "images": []
+        },
+        {
+          "text": "What is the secondary encryption protocol detected?",
+          "images": []
+        }
+      ]
+    },
+    {
+      "title": "NEW MISSION",
+      "description": "ENTER INTEL HERE",
+      "timerEnabled": true,
+      "duration": 60,
+      "visible": true,
+      "questions": [
+        {
+          "text": "yash",
+          "images": [
+            "/uploads/image-1769750547490-69831714.jpeg"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "NEW MISSION",
+      "description": "ENTER INTEL HERE",
+      "timerEnabled": false,
+      "duration": 60,
+      "visible": true,
+      "questions": []
+    },
+    {
+      "title": "round 3 ",
+      "description": "ENTER INTEL HERE",
+      "timerEnabled": false,
+      "duration": 60,
+      "visible": true,
+      "questions": [],
+      "password": "yash"
+    }
+  ]
+}
