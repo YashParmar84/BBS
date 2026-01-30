@@ -1,15 +1,13 @@
 :root {
-    --bg-primary: #020205; /* Deeper black */
-    --bg-secondary: #080810;
-    --card-bg: rgba(8, 8, 12, 0.7);
+    --bg-primary: #050508;
+    --bg-secondary: #0a0a0f;
+    --card-bg: rgba(10, 10, 15, 0.65);
     --accent-cyan: #00d9ff;
-    --accent-dim: #004a5c;
-    --neon-blue: #008cff;
-    --neon-purple: #9d00ff;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --shadow-glow: 0 0 30px rgba(0, 217, 255, 0.1);
+    --accent-dim: #005a69;
+    --text-primary: #e2e8f0;
+    --text-secondary: #64748b;
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --shadow-glow: 0 0 20px rgba(0, 217, 255, 0.05);
     --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'Outfit', sans-serif;
 }
@@ -40,13 +38,11 @@ html {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 50% 50%, #0a0a1a 0%, #020205 100%);
-    /* Use the technomatra logo image as the background with modern glass overlay */
-    background-image: linear-gradient(rgba(2, 2, 5, 0.85), rgba(2, 2, 5, 0.85)), url('bg.jpg');
+    background-image: linear-gradient(rgba(5, 5, 8, 0.1), rgba(5, 5, 8, 0.1)), url('buddha-bg.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    z-index: -2;
+    z-index: -1;
 }
 
 body::before {
@@ -96,14 +92,22 @@ h1, h2, h3, h4, h5, h6 {
     top: 0;
     left: 0;
     width: 100%;
-    height: clamp(60px, 10vh, 80px);
+    height: 80px;
     background: rgba(5, 5, 8, 0.75);
     backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--glass-border);
-    z-index: 5000;
+    z-index: 5000; /* Increased significantly to stay above everything */
     display: flex;
     align-items: center;
-    padding: 0 clamp(1rem, 5vw, 2rem);
+    padding: 0 2rem;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    #navbar {
+        height: 60px;
+        padding: 0 1rem;
+    }
 }
 
 .nav-inner {
@@ -116,11 +120,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .logo {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
     font-family: var(--font-display);
-    font-size: clamp(0.9rem, 4vw, 1.5rem);
+    font-size: 1.5rem;
     font-weight: 800;
     letter-spacing: 0.1em;
     color: var(--text-primary);
@@ -128,29 +129,58 @@ h1, h2, h3, h4, h5, h6 {
     white-space: nowrap;
 }
 
-.logo-img {
-    height: clamp(30px, 5vh, 45px);
-    width: auto;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+@media (max-width: 768px) {
+    .logo {
+        font-size: 1.1rem;
+        letter-spacing: 0.05em;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        font-size: 0.9rem;
+    }
 }
 
 .nav-right {
     display: flex;
     align-items: center;
-    gap: clamp(0.5rem, 3vw, 1.5rem);
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .nav-right {
+        gap: 0.75rem;
+    }
 }
 
 #user-name-display {
-    font-size: clamp(0.65rem, 2vw, 0.875rem);
+    font-size: 0.875rem;
     color: var(--text-secondary);
     font-weight: 600;
     letter-spacing: 0.05em;
 }
 
+@media (max-width: 768px) {
+    #user-name-display {
+        font-size: 0.7rem;
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
 .btn-nav {
-    padding: clamp(0.4rem, 1.5vw, 0.5rem) clamp(0.8rem, 3vw, 1.5rem);
-    font-size: clamp(0.65rem, 2vw, 0.875rem);
+    padding: 0.5rem 1.5rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .btn-nav {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.7rem;
+    }
 }
 
 /* Screen Management */
@@ -171,6 +201,12 @@ h1, h2, h3, h4, h5, h6 {
                 transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     overflow-y: auto;
     z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .screen {
+        padding: 80px 1rem 4rem;
+    }
 }
 
 /* Specific centering for login and welcome */
@@ -197,6 +233,13 @@ h1, h2, h3, h4, h5, h6 {
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .glass-card {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
 }
 
 .glass-card::before {
@@ -447,6 +490,13 @@ textarea {
     width: 100%;
 }
 
+@media (max-width: 768px) {
+    .task-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
 /* Task Cards */
 .task-card {
     background: var(--card-bg);
@@ -524,6 +574,19 @@ textarea {
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--glass-border);
+    gap: 1rem; /* Added gap */
+}
+
+@media (max-width: 768px) {
+    .task-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    #header-complete-task-btn {
+        width: 100%;
+    }
 }
 
 #task-view-title {
@@ -551,6 +614,12 @@ textarea {
     border-radius: 16px;
     padding: 2rem;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 768px) {
+    .question-item {
+        padding: 1rem;
+    }
 }
 
 .question-item.secured {
@@ -587,6 +656,14 @@ textarea {
     cursor: pointer;
 }
 
+@media (max-width: 768px) {
+    .task-image {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4/3;
+    }
+}
+
 .task-image:hover {
     transform: scale(1.05);
     border-color: var(--accent-cyan);
@@ -608,6 +685,13 @@ textarea {
     z-index: 999;
 }
 
+@media (max-width: 768px) {
+    #status-overlay {
+        top: 70px;
+        right: 1rem;
+    }
+}
+
 #timer-box {
     background: rgba(10, 10, 15, 0.9);
     backdrop-filter: blur(20px);
@@ -617,6 +701,12 @@ textarea {
     text-align: center;
     box-shadow: 0 8px 30px rgba(0, 217, 255, 0.1);
     animation: timerPulse 2s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+    #timer-box {
+        padding: 0.75rem 1rem;
+    }
 }
 
 @keyframes timerPulse {
@@ -638,6 +728,12 @@ textarea {
     font-weight: 800;
     color: var(--accent-cyan);
     letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+    #timer-clock {
+        font-size: 1.25rem;
+    }
 }
 
 /* Final Screen */
@@ -662,6 +758,12 @@ textarea {
     font-size: 3rem;
     margin-bottom: 1.5rem;
     color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .final-card h1 {
+        font-size: 2rem;
+    }
 }
 
 .final-card p {
@@ -979,6 +1081,12 @@ textarea {
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@media (max-width: 768px) {
+    .modal-card {
+        padding: 1.5rem;
+    }
+}
+
 .modal-overlay.active .modal-card {
     transform: scale(1);
 }
@@ -1005,294 +1113,5 @@ textarea {
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
-}
-
-/* ==========================================================================
-   RESPONSIVE DESIGN SYSTEM
-   ========================================================================== */
-
-/* Medium Devices (Tablets, 1024px and down) */
-@media screen and (max-width: 1024px) {
-    .task-grid {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
-    }
-    
-    .admin-container {
-        padding: 0 1rem;
-    }
-}
-
-/* Small Devices (Phones, 768px and down) */
-@media screen and (max-width: 768px) {
-    /* Layout & Spacing */
-    .screen {
-        padding: 90px 1rem 4rem;
-    }
-
-    .glass-card {
-        padding: 1.5rem;
-        border-radius: 16px;
-    }
-
-    /* Navbar Redesign */
-    #navbar {
-        height: clamp(56px, 8vh, 70px);
-        padding: 0 0.75rem;
-    }
-
-    .nav-inner {
-        gap: 0.5rem;
-        display: flex;
-        align-items: center;
-        width: 100%;
-    }
-
-    .logo {
-        font-size: clamp(0.75rem, 3.5vw, 1rem); /* Further reduced min size */
-        flex: 1; /* Allow logo area to grow/shrink */
-        min-width: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .nav-right {
-        gap: clamp(0.25rem, 1.5vw, 0.5rem);
-        flex: 0 0 auto; /* Don't let right side grow too much */
-        display: flex;
-        align-items: center;
-        min-width: 0;
-    }
-
-    #user-name-display {
-        display: block;
-        font-size: clamp(0.5rem, 2vw, 0.7rem);
-        max-width: clamp(60px, 20vw, 100px);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        text-align: right;
-    }
-
-    .btn-nav {
-        padding: 0.25rem 0.5rem;
-        font-size: clamp(0.5rem, 2vw, 0.7rem);
-        height: auto;
-        min-height: 26px;
-        white-space: nowrap;
-    }
-
-    /* Hero Section */
-    .hero-title {
-        font-size: 3rem;
-    }
-
-    .subtitle {
-        font-size: 0.7rem;
-        letter-spacing: 0.2em;
-    }
-
-    /* Task Grid */
-    .task-grid {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
-    }
-
-    /* Task View */
-    .task-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1.25rem;
-    }
-
-    #task-view-title {
-        font-size: 1.5rem;
-    }
-
-    .task-header > div {
-        justify-content: space-between;
-    }
-
-    #header-timer {
-        justify-content: center;
-        width: 100%;
-    }
-
-    /* Question Items */
-    .question-item {
-        padding: 1.25rem;
-    }
-
-    .question-item > div:first-child {
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: 1rem;
-    }
-
-    .question-item .btn {
-        width: 100%;
-    }
-
-    .task-image {
-        width: calc(50% - 0.5rem);
-        height: 120px;
-    }
-
-    /* Admin Panel */
-    .admin-nav {
-        flex-direction: column;
-        position: static;
-    }
-
-    .admin-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .admin-header div {
-        text-align: left !important;
-    }
-
-    /* Admin Panel Table Responsive Transform */
-    .mission-table thead {
-        display: none; /* Hide headers on mobile */
-    }
-
-    .mission-table, .mission-table tbody, .mission-table tr, .mission-table td {
-        display: block;
-        width: 100%;
-    }
-
-    .mission-table tr {
-        margin-bottom: 1.5rem;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--glass-border);
-        border-radius: 12px;
-        padding: 1rem;
-    }
-
-    .mission-table td {
-        border: none;
-        padding: 0.5rem 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        text-align: right;
-    }
-
-    .mission-table td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: var(--text-secondary);
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        margin-right: 1rem;
-        text-align: left;
-    }
-
-    .admin-actions-cell {
-        flex-direction: row;
-        justify-content: flex-end;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-        border-top: 1px solid var(--glass-border);
-        padding-top: 1rem;
-    }
-
-    /* Admin Editor */
-    #admin-mission-editor-view .admin-task-card > div:first-child {
-        grid-template-columns: 1fr !important;
-    }
-
-    .admin-page-content {
-        padding: 1rem !important;
-    }
-
-    /* Discovery Modal */
-    .modal-card[style*="max-width: 800px"] {
-        height: 95vh !important;
-        margin: 0;
-        border-radius: 0;
-    }
-
-    /* Status Overlay (Timer) */
-    #status-overlay {
-        top: 70px;
-        right: 1rem;
-        left: 1rem;
-    }
-
-    #timer-box {
-        padding: 0.75rem 1rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    #timer-clock {
-        font-size: 1.5rem;
-    }
-
-    .timer-label {
-        margin-bottom: 0;
-    }
-
-    /* Modals */
-    .modal-card {
-        padding: 1.5rem;
-        margin: 1rem;
-    }
-
-    .modal-footer {
-        flex-direction: column-reverse;
-    }
-
-    .modal-footer .btn {
-        width: 100%;
-    }
-}
-
-/* Extra Small Devices (Tiny Phones, 480px and down) */
-@media screen and (max-width: 480px) {
-    .hero-title {
-        font-size: 2.5rem;
-    }
-
-    .btn {
-        padding: 0.8rem 1.5rem;
-        font-size: 0.75rem;
-    }
-
-    .task-image {
-        width: 100%;
-        height: 180px;
-    }
-
-    .final-card h1 {
-        font-size: 1.8rem;
-    }
-
-    .final-icon {
-        font-size: 3.5rem;
-    }
-}
-
-/* Handle landscape mode on phones specifically if needed */
-@media screen and (max-height: 500px) and (max-width: 900px) {
-    .screen {
-        padding-top: 70px;
-    }
-    
-    #login-screen, #welcome-screen, #final-screen {
-        justify-content: flex-start;
-        padding-top: 80px;
-    }
-    
-    .hero-title {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-    }
 }
 
