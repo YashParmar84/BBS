@@ -2,7 +2,7 @@
   "users": [
     {
       "username": "yash",
-      "completedTasks": 3,
+      "completedTasks": 4,
       "performance": "Operative",
       "startTime": "2026-01-30T04:59:29.671Z",
       "itemsFound": {
@@ -12,7 +12,10 @@
         ]
       },
       "disqualified": false,
-      "wrongAttempts": {}
+      "wrongAttempts": {},
+      "submissionTimes": {
+        "4": "2026-01-31T05:28:03.490Z"
+      }
     },
     {
       "username": "raxit",
