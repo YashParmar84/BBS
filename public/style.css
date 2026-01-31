@@ -785,12 +785,20 @@ textarea {
 
 .admin-nav {
     display: flex;
-    gap: 1rem;
-    padding: 1rem !important;
+    gap: 0.75rem;
+    padding: 0.75rem !important;
     border-radius: 16px !important;
     position: sticky;
-    top: 0;
+    top: 80px; /* Account for navbar */
     z-index: 100;
+}
+
+@media (max-width: 768px) {
+    .admin-nav {
+        top: 60px;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
 }
 
 .admin-tab {
@@ -808,6 +816,25 @@ textarea {
     align-items: center;
     justify-content: center;
     gap: 10px;
+}
+
+.tab-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.admin-tab:hover .tab-icon {
+    transform: scale(1.2);
+}
+
+@media (max-width: 480px) {
+    .admin-tab {
+        font-size: 0.7rem;
+        padding: 0.75rem 0.5rem;
+    }
+    .tab-icon {
+        font-size: 1rem;
+    }
 }
 
 .admin-tab:hover {
@@ -852,6 +879,17 @@ textarea {
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--glass-border);
     gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        text-align: center;
+    }
+    .admin-header div {
+        text-align: center !important;
+    }
 }
 
 .btn-sm {
@@ -955,6 +993,46 @@ textarea {
 
 .mission-table tr:hover td {
     background: rgba(255, 255, 255, 0.01);
+}
+
+@media (max-width: 1024px) {
+    .mission-table th, .mission-table td {
+        padding: 1rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .mission-table thead {
+        display: none;
+    }
+    .mission-table, .mission-table tbody, .mission-table tr, .mission-table td {
+        display: block;
+        width: 100%;
+    }
+    .mission-table tr {
+        margin-bottom: 1.5rem;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1rem;
+    }
+    .mission-table td {
+        border: none;
+        padding: 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+    }
+    .mission-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-align: left;
+    }
 }
 
 .status-badge {
@@ -1084,6 +1162,8 @@ textarea {
 @media (max-width: 768px) {
     .modal-card {
         padding: 1.5rem;
+        max-width: 95%;
+        margin: auto;
     }
 }
 
@@ -1113,5 +1193,25 @@ textarea {
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
+}
+
+/* Discovery Item Responsive */
+.discovery-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+@media (max-width: 480px) {
+    .discovery-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    .discovery-item button {
+        width: 100%;
+    }
 }
 

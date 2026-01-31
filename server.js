@@ -65,7 +65,8 @@ app.post('/api/login', (req, res) => {
                 disqualified: false,
                 wrongAttempts: {}, // { taskId: count }
                 performance: 'Operative',
-                startTime: new Date().toISOString()
+                startTime: new Date().toISOString(),
+                submissionTimes: {} // { taskId: timestamp }
             };
             data.users.push(user);
             writeData(data);
@@ -92,6 +93,8 @@ app.post('/api/complete-task', (req, res) => {
     if (user) {
         if (taskId > user.completedTasks) {
             user.completedTasks = taskId;
+            if (!user.submissionTimes) user.submissionTimes = {};
+            user.submissionTimes[taskId] = new Date().toISOString();
         }
         writeData(data);
         return res.json({ success: true, userData: user });
@@ -143,6 +146,7 @@ app.post('/api/admin/reset-user', (req, res) => {
     let user = data.users.find(u => u.username === username);
     if (user) {
         user.completedTasks = 0;
+        user.submissionTimes = {};
         writeData(data);
         return res.json({ success: true });
     }

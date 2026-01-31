@@ -3,6 +3,25 @@ let allTasks = [];
 let currentTaskIndex = 0;
 let timerInterval = null;
 let timeLeft = 0;
+let extractionInterval = null;
+
+// --- PERSISTENT TIMER UTILS ---
+function getPersistentEndTime(type, id) {
+    const key = `bbs_timer_${type}_${currentUser.username}_${id}`;
+    return localStorage.getItem(key);
+}
+
+function setPersistentEndTime(type, id, seconds) {
+    const key = `bbs_timer_${type}_${currentUser.username}_${id}`;
+    const endTime = Date.now() + (seconds * 1000);
+    localStorage.setItem(key, endTime);
+    return endTime;
+}
+
+function clearPersistentTimer(type, id) {
+    const key = `bbs_timer_${type}_${currentUser.username}_${id}`;
+    localStorage.removeItem(key);
+}
 
 // Admin data storage
 let adminUsers = [];
@@ -123,6 +142,19 @@ async function showHome(forceHome = false) {
 
     renderTasks();
     showScreen('home-screen');
+
+    // Restore any active extraction timer on home screen
+    allTasks.forEach((task, index) => {
+        const extractionEnd = getPersistentEndTime('extraction', index);
+        if (extractionEnd) {
+            const remaining = Math.ceil((parseInt(extractionEnd) - Date.now()) / 1000);
+            if (remaining > 0) {
+                startExtractionTimer(remaining, index, true);
+            } else {
+                clearPersistentTimer('extraction', index);
+            }
+        }
+    });
 }
 
 function renderTasks() {
@@ -170,6 +202,9 @@ function openTask(index, forceOpen = false) {
     const isLocked = index > currentUser.completedTasks;
     const isCompleted = index < currentUser.completedTasks;
 
+    const hasActiveMissionTimer = getPersistentEndTime('mission', index);
+    const hasActiveExtractionTimer = getPersistentEndTime('extraction', index);
+
     // Reset header timer visibility on opening
     document.getElementById('header-timer').style.display = 'none';
     const headerSubmit = document.getElementById('header-complete-task-btn');
@@ -183,7 +218,7 @@ function openTask(index, forceOpen = false) {
         footerSubmit.style.display = 'block';
     }
 
-    if (isLocked && task.password && !forceOpen) {
+    if (isLocked && task.password && !forceOpen && !hasActiveMissionTimer && !hasActiveExtractionTimer) {
         const attempts = (currentUser.wrongAttempts && currentUser.wrongAttempts[index]) || 0;
         document.getElementById('mission-pass-input').value = '';
         document.getElementById('password-feedback').innerText = '';
@@ -227,10 +262,29 @@ function openTask(index, forceOpen = false) {
     }
 
     // Timer Logic
-    if (task.timerEnabled) {
-        startTimer(task.duration);
+    if (task.timerEnabled && !isCompleted) {
+        const persistentEnd = getPersistentEndTime('mission', index);
+        if (persistentEnd) {
+            const remaining = Math.ceil((parseInt(persistentEnd) - Date.now()) / 1000);
+            if (remaining > 0) {
+                startTimer(remaining, index, true);
+            } else {
+                handleTimeUp();
+            }
+        } else {
+            startTimer(task.duration, index);
+        }
     } else {
         stopTimer();
+    }
+
+    // Check for active extraction timer
+    const extractionEnd = getPersistentEndTime('extraction', index);
+    if (extractionEnd) {
+        const remaining = Math.ceil((parseInt(extractionEnd) - Date.now()) / 1000);
+        if (remaining > 0) {
+            startExtractionTimer(remaining, index, true);
+        }
     }
 
     const submitFn = () => submitTaskCompletion(index + 1);
@@ -313,22 +367,35 @@ function switchAdminTab(tab) {
 }
 
 // --- TIMER SYSTEM ---
-function startTimer(seconds) {
+function startTimer(seconds, taskId, isResume = false) {
     stopTimer();
     timeLeft = seconds;
+
+    if (!isResume && taskId !== undefined) {
+        setPersistentEndTime('mission', taskId, seconds);
+    }
+
     const box = document.getElementById('timer-box');
-    const clock = document.getElementById('timer-clock');
     box.style.display = 'block';
 
     updateTimerDisplay();
 
     timerInterval = setInterval(() => {
-        timeLeft--;
-        updateTimerDisplay();
+        const persistentEnd = getPersistentEndTime('mission', taskId !== undefined ? taskId : currentTaskIndex);
+        if (persistentEnd) {
+            timeLeft = Math.ceil((parseInt(persistentEnd) - Date.now()) / 1000);
+        } else {
+            timeLeft--;
+        }
 
         if (timeLeft <= 0) {
+            timeLeft = 0;
+            updateTimerDisplay();
             clearInterval(timerInterval);
+            clearPersistentTimer('mission', taskId !== undefined ? taskId : currentTaskIndex);
             handleTimeUp();
+        } else {
+            updateTimerDisplay();
         }
     }, 1000);
 }
@@ -376,30 +443,36 @@ function renderAdminStats() {
         }
 
         const isDisqualified = user.disqualified;
+        const lastSubmitTime = user.submissionTimes && user.completedTasks > 0
+            ? new Date(user.submissionTimes[user.completedTasks]).toLocaleTimeString()
+            : '---';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td style="font-weight: 800; color: ${isDisqualified ? 'var(--neon-red)' : 'var(--accent-cyan)'};">${user.username.toUpperCase()}</td>
-            <td style="font-size: 0.75rem; color: var(--text-secondary);">BBS-${Math.random().toString(36).substr(2, 6).toUpperCase()}</td>
-            <td>
+            <td data-label="OPERATIVE" style="font-weight: 800; color: ${isDisqualified ? 'var(--neon-red)' : 'var(--accent-cyan)'};">${user.username.toUpperCase()}</td>
+            <td data-label="ID" style="font-size: 0.75rem; color: var(--text-secondary);">BBS-${Math.random().toString(36).substr(2, 6).toUpperCase()}</td>
+            <td data-label="STATUS">
                 <span style="background: ${isDisqualified ? 'rgba(255, 59, 105, 0.1)' : 'rgba(0, 217, 255, 0.1)'}; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; color: ${isDisqualified ? 'var(--neon-red)' : 'var(--accent-cyan)'}; border: 1px solid ${isDisqualified ? 'var(--neon-red)' : 'var(--accent-cyan)'};">
                     ${isDisqualified ? 'DISQUALIFIED' : 'ONLINE'}
                 </span>
             </td>
-            <td>
+            <td data-label="MISSIONS">
                 <div style="font-weight: 700;">${user.completedTasks} / ${adminTasks.length}</div>
             </td>
-            <td>
+            <td data-label="ITEMS FOUND">
                 <button class="btn btn-sm" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--accent-cyan);" 
                         onclick="showDiscoveryModal('${user.username}')">${totalItemsFound} ITEMS</button>
             </td>
-            <td>
+            <td data-label="SUBMIT TIME" style="font-size: 0.8rem; font-family: 'Space Grotesk', monospace;">
+                ${lastSubmitTime}
+            </td>
+            <td data-label="SECURITY">
                 <button class="btn btn-sm ${isDisqualified ? 'btn-save' : 'btn-back'}" style="width: 110px;"
                         onclick="toggleDisqualification('${user.username}', ${!isDisqualified})">
                     ${isDisqualified ? 'REINSTATE' : 'DISQUALIFY'}
                 </button>
             </td>
-            <td style="display: flex; gap: 0.5rem;">
+            <td data-label="ACTIONS" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                 <button class="btn btn-sm btn-back" onclick="resetUser('${user.username}')">RESET</button>
             </td>
         `;
@@ -438,7 +511,7 @@ function renderDiscoveryDetails(user) {
             task.questions.forEach((q, qIdx) => {
                 const isFound = user.itemsFound && user.itemsFound[tIdx] && user.itemsFound[tIdx].includes(qIdx);
                 itemsHtml += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div class="discovery-item">
                         <span style="font-size: 0.8rem;">Item 0${qIdx + 1}: ${q.text}</span>
                         <button class="btn btn-sm ${isFound ? 'btn-save' : 'btn-add'}" style="padding: 2px 10px; font-size: 0.6rem;"
                                 onclick="adminToggleUserItem('${user.username}', ${tIdx}, ${qIdx})">
@@ -498,16 +571,16 @@ function renderAdminTasks() {
         const isVisible = task.visible !== false;
 
         tr.innerHTML = `
-            <td>#0${tIdx + 1}</td>
-            <td style="font-weight: 700;">${task.title}</td>
-            <td>
+            <td data-label="ID">#0${tIdx + 1}</td>
+            <td data-label="TITLE" style="font-weight: 700;">${task.title}</td>
+            <td data-label="STATUS">
                 <span class="status-badge ${isVisible ? 'status-active' : 'status-hidden'}">
                     ${isVisible ? 'ACTIVE' : 'HIDDEN'}
                 </span>
             </td>
-            <td>${task.timerEnabled ? `${task.duration}s` : 'OFF'}</td>
-            <td class="admin-actions-cell">
-                <button class="btn btn-sm" style="background: rgba(255,255,255,0.05); border:1px solid var(--glass-border);" onclick="showMissionEditor(${tIdx})">EDIT MISSION</button>
+            <td data-label="TIMER">${task.timerEnabled ? `${task.duration}s` : 'OFF'}</td>
+            <td data-label="ACTIONS" class="admin-actions-cell" style="justify-content: flex-end;">
+                <button class="btn btn-sm" style="background: rgba(255,255,255,0.05); border:1px solid var(--glass-border);" onclick="showMissionEditor(${tIdx})">EDIT</button>
                 <button class="btn btn-sm btn-back" onclick="deleteTask(${tIdx})">DELETE</button>
             </td>
         `;
@@ -551,7 +624,7 @@ function renderMissionEditor(tIdx) {
 
     container.innerHTML = `
         <div class="admin-task-card" style="background: transparent; border: none; padding: 0;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+            <div class="editor-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
                 <div class="input-group" style="margin-bottom: 0;">
                     <label>MISSION TITLE</label>
                     <input type="text" value="${task.title}" oninput="updateTaskField(${tIdx}, 'title', this.value)">
@@ -722,6 +795,7 @@ async function submitTaskCompletion(taskId) {
     const confirmed = await showSystemModal("INITIALIZE UPLOAD", "Are you sure you want to finalize this mission's data? Current intel acquisition will be locked.", true, '📤');
     if (!confirmed) return;
 
+    clearPersistentTimer('mission', taskId - 1);
     stopTimer();
 
     // Check if all items secured
@@ -742,7 +816,7 @@ async function submitTaskCompletion(taskId) {
             sessionStorage.setItem('bbs_user', JSON.stringify(currentUser));
 
             if (allSecured) {
-                startExtractionTimer(60);
+                startExtractionTimer(60, taskIndex);
                 openTask(taskIndex); // Re-render in read-only mode
             } else {
                 showHome();
@@ -753,9 +827,12 @@ async function submitTaskCompletion(taskId) {
     }
 }
 
-let extractionInterval = null;
-function startExtractionTimer(seconds) {
+function startExtractionTimer(seconds, taskId, isResume = false) {
     if (extractionInterval) clearInterval(extractionInterval);
+
+    if (!isResume && taskId !== undefined) {
+        setPersistentEndTime('extraction', taskId, seconds);
+    }
 
     let time = seconds;
     const timerBox = document.getElementById('header-timer');
@@ -774,14 +851,23 @@ function startExtractionTimer(seconds) {
     updateDisplay();
 
     extractionInterval = setInterval(() => {
-        time--;
-        updateDisplay();
+        const persistentEnd = getPersistentEndTime('extraction', taskId);
+        if (persistentEnd) {
+            time = Math.ceil((parseInt(persistentEnd) - Date.now()) / 1000);
+        } else {
+            time--;
+        }
 
         if (time <= 0) {
+            time = 0;
+            updateDisplay();
             clearInterval(extractionInterval);
+            clearPersistentTimer('extraction', taskId);
             showSystemModal("TIME'S UP", "Extraction window closed. Returning to home roster.", false, '⌛').then(() => {
                 showHome();
             });
+        } else {
+            updateDisplay();
         }
     }, 1000);
 }
